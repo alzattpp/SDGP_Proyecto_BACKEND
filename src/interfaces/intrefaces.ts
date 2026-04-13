@@ -4,6 +4,7 @@ export interface UsuarioInterface {
   correo: string;
   contrasena: string;
   documento: string;
+  rol: string;
 }
 
 export interface TrabajadorInterface {

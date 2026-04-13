@@ -26,12 +26,17 @@ export async function loginUsuario(req: Request, res: Response): Promise<Respons
     }
 
     const validPassword = await bcrypt.compare(contrasena, usuario.contrasena);
+
     if (!validPassword) {
       return res.status(HttpStatusCode.Unauthorized).json({ message: "Contraseña incorrecta" });
     }
 
+    // 🔥 TOKEN CON ROL
     const token = jwt.sign(
-      { userId: usuario.idUsuario },
+      {
+        userId: usuario.idUsuario,
+        rol: usuario.rol // 🔥 clave
+      },
       secretKey,
       { expiresIn: "1h" }
     );
@@ -43,7 +48,10 @@ export async function loginUsuario(req: Request, res: Response): Promise<Respons
       maxAge: 3600000,
     });
 
-    return res.status(HttpStatusCode.Ok).json({ message: "Login exitoso" });
+    return res.status(HttpStatusCode.Ok).json({
+      message: "Login exitoso",
+      rol: usuario.rol // 🔥 opcional para frontend
+    });
 
   } catch (error) {
     console.error(error);
@@ -71,15 +79,17 @@ export async function getCurrentUsuario(req: Request, res: Response): Promise<Re
     }
 
     const decoded: any = jwt.verify(token, secretKey);
-    const userId = decoded.userId;
 
-    const usuario = await getUsuarioById_get(Number(userId));
+    const usuario = await getUsuarioById_get(Number(decoded.userId));
 
     if (!usuario) {
       return res.status(HttpStatusCode.NotFound).json({ message: "Usuario no encontrado" });
     }
 
-    return res.status(HttpStatusCode.Ok).json({ data: usuario });
+    return res.status(HttpStatusCode.Ok).json({
+      data: usuario,
+      rol: decoded.rol // 🔥 también puedes devolverlo
+    });
 
   } catch (error) {
     console.error(error);
@@ -91,6 +101,7 @@ export async function getCurrentUsuario(req: Request, res: Response): Promise<Re
 export async function getUsuarioById(req: Request, res: Response): Promise<Response> {
   try {
     const { id } = req.params;
+
     const usuario = await getUsuarioById_get(Number(id));
 
     if (!usuario) {
@@ -107,16 +118,16 @@ export async function getUsuarioById(req: Request, res: Response): Promise<Respo
 // 🔹 POST create
 export async function createUsuario(req: Request, res: Response): Promise<Response> {
   try {
-    const { nombreCompleto, correo, contrasena, documento } = req.body;
+    const { nombreCompleto, correo, contrasena, documento, rol } = req.body;
 
-    const passSalt = bcrypt.genSaltSync(10);
-    const encryptedPass = bcrypt.hashSync(contrasena, passSalt);
+    const encryptedPass = bcrypt.hashSync(contrasena, 10);
 
     const success = await createUsuario_post({
       nombreCompleto,
       correo,
       contrasena: encryptedPass,
       documento,
+      rol: rol || "usuario" // 🔥 default
     });
 
     if (!success) {
@@ -135,9 +146,10 @@ export async function createUsuario(req: Request, res: Response): Promise<Respon
 export async function updateUsuario(req: Request, res: Response): Promise<Response> {
   try {
     const { id } = req.params;
-    const { nombreCompleto, correo, contrasena, documento } = req.body;
+    const { nombreCompleto, correo, contrasena, documento, rol } = req.body;
 
-    let encryptedPass = contrasena;
+    let encryptedPass;
+
     if (contrasena) {
       encryptedPass = bcrypt.hashSync(contrasena, 10);
     }
@@ -146,8 +158,9 @@ export async function updateUsuario(req: Request, res: Response): Promise<Respon
       idUsuario: Number(id),
       nombreCompleto,
       correo,
-      contrasena: encryptedPass,
+      contrasena: encryptedPass || contrasena,
       documento,
+      rol // 🔥 incluir rol
     });
 
     if (!success) {

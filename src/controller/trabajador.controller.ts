@@ -7,8 +7,10 @@ import {
   updateTrabajador_put,
   deleteTrabajador_delete,
 } from "../models/trabajador.model";
-
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
+const secretKey = "clave-secreta";
 
 // 🔹 GET ALL
 export async function getTrabajadores(req: Request, res: Response): Promise<Response> {
@@ -113,5 +115,42 @@ export async function deleteTrabajador(req: Request, res: Response): Promise<Res
   } catch (error) {
     console.error(error);
     return res.status(HttpStatusCode.InternalServerError).json({ message: "Error en el servidor" });
+  }
+}
+// 🔹 GET /me TRABAJADOR
+export async function getCurrentTrabajador(req: Request, res: Response): Promise<Response> {
+  try {
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(HttpStatusCode.Unauthorized).json({ message: "No autenticado" });
+    }
+
+    const decoded: any = jwt.verify(token, secretKey);
+
+    // 🔥 VALIDAMOS QUE SEA TRABAJADOR
+    if (decoded.rol !== "trabajador") {
+      return res.status(HttpStatusCode.Forbidden).json({ message: "No autorizado" });
+    }
+
+    // 🔥 buscamos trabajador por idUsuario
+    const trabajadores = await getTrabajadores_get();
+
+    const trabajador = trabajadores.find(
+      (t) => t.idUsuario === Number(decoded.userId)
+    );
+
+    if (!trabajador) {
+      return res.status(HttpStatusCode.NotFound).json({ message: "Trabajador no encontrado" });
+    }
+
+    return res.status(HttpStatusCode.Ok).json({
+      data: trabajador,
+      rol: decoded.rol
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(HttpStatusCode.InternalServerError).json({ message: "Error al verificar sesión" });
   }
 }

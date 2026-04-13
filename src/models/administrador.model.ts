@@ -47,16 +47,15 @@ export async function getAdministradorById_get(idAdmin: number): Promise<any | n
   }
 }
 
-// 🔹 CREATE (TRANSACCIÓN 🔥)
 export async function createAdministrador_post(data: AdministradorInterface): Promise<boolean> {
   try {
     await db.connect();
     await db.beginTransaction();
 
-    // 1. usuario
+    // 🔥 AQUÍ EL CAMBIO
     const sqlUsuario = `
-      INSERT INTO Usuario (nombreCompleto, correo, contrasena, documento)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO Usuario (nombreCompleto, correo, contrasena, documento, rol)
+      VALUES (?, ?, ?, ?, ?)
     `;
 
     const resultUsuario: any = await db.query(sqlUsuario, [
@@ -64,11 +63,11 @@ export async function createAdministrador_post(data: AdministradorInterface): Pr
       data.correo,
       data.contrasena,
       data.documento,
+      "admin" // 🔥 CLAVE
     ]);
 
     const idUsuario = resultUsuario.insertId;
 
-    // 2. admin
     const sqlAdmin = `
       INSERT INTO Administrador (idUsuario)
       VALUES (?)
@@ -95,9 +94,10 @@ export async function updateAdministrador_put(data: AdministradorInterface): Pro
     await db.connect();
     await db.beginTransaction();
 
+    // 🔥 FORZAMOS rol = admin
     const sqlUsuario = `
       UPDATE Usuario
-      SET nombreCompleto = ?, correo = ?, contrasena = ?, documento = ?
+      SET nombreCompleto = ?, correo = ?, contrasena = ?, documento = ?, rol = 'admin'
       WHERE idUsuario = ?
     `;
 

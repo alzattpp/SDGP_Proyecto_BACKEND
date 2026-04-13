@@ -11,7 +11,8 @@ import {
   getTrabajadorById,
   createTrabajador,
   updateTrabajador,
-  deleteTrabajador
+  deleteTrabajador,
+  getCurrentTrabajador
 } from "../controller/trabajador.controller";
 
 const router = Router();
@@ -29,5 +30,6 @@ router.put(
   updateTrabajador
 );
 router.delete("/delete/:idUsuario", deleteTrabajador);
+router.get("/me", getCurrentTrabajador);
 
 export default router;

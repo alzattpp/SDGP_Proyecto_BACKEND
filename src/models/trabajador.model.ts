@@ -55,9 +55,10 @@ export async function createTrabajador_post(data: TrabajadorInterface): Promise<
     await db.connect();
     await db.beginTransaction();
 
+    // 🔥 AQUÍ VA EL CAMBIO
     const sqlUsuario = `
-      INSERT INTO Usuario (nombreCompleto, correo, contrasena, documento)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO Usuario (nombreCompleto, correo, contrasena, documento, rol)
+      VALUES (?, ?, ?, ?, ?)
     `;
 
     const resultUsuario: any = await db.query(sqlUsuario, [
@@ -65,6 +66,7 @@ export async function createTrabajador_post(data: TrabajadorInterface): Promise<
       data.correo,
       data.contrasena,
       data.documento,
+      "trabajador" // 🔥 CLAVE
     ]);
 
     const idUsuario = resultUsuario.insertId;
@@ -100,11 +102,11 @@ export async function updateTrabajador_put(data: TrabajadorInterface): Promise<b
     await db.beginTransaction();
 
     // 1. actualizar usuario
-    const sqlUsuario = `
-      UPDATE Usuario
-      SET nombreCompleto = ?, correo = ?, contrasena = ?, documento = ?
-      WHERE idUsuario = ?
-    `;
+const sqlUsuario = `
+  UPDATE Usuario
+  SET nombreCompleto = ?, correo = ?, contrasena = ?, documento = ?, rol = 'trabajador'
+  WHERE idUsuario = ?
+`;
 
     await db.query(sqlUsuario, [
       data.nombreCompleto,
