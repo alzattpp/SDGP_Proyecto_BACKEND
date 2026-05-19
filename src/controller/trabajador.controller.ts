@@ -123,25 +123,33 @@ export async function getCurrentTrabajador(req: Request, res: Response): Promise
     const token = req.cookies.token;
 
     if (!token) {
-      return res.status(HttpStatusCode.Unauthorized).json({ message: "No autenticado" });
+      return res.status(HttpStatusCode.Unauthorized).json({
+        message: "No autenticado"
+      });
     }
 
     const decoded: any = jwt.verify(token, secretKey);
 
-    // 🔥 VALIDAMOS QUE SEA TRABAJADOR
     if (decoded.rol !== "trabajador") {
-      return res.status(HttpStatusCode.Forbidden).json({ message: "No autorizado" });
+      return res.status(HttpStatusCode.Forbidden).json({
+        message: "No autorizado"
+      });
     }
 
-    // 🔥 buscamos trabajador por idUsuario
     const trabajadores = await getTrabajadores_get();
 
+    console.log("ID USUARIO TOKEN:", decoded.userId);
+    console.log("TRABAJADORES:", trabajadores);
+
     const trabajador = trabajadores.find(
-      (t) => t.idUsuario === Number(decoded.userId)
+      (t) => Number(t.idUsuario) === Number(decoded.userId)
     );
 
     if (!trabajador) {
-      return res.status(HttpStatusCode.NotFound).json({ message: "Trabajador no encontrado" });
+      return res.status(HttpStatusCode.NotFound).json({
+        message: "Trabajador no encontrado",
+        idUsuarioToken: decoded.userId
+      });
     }
 
     return res.status(HttpStatusCode.Ok).json({
@@ -151,6 +159,8 @@ export async function getCurrentTrabajador(req: Request, res: Response): Promise
 
   } catch (error) {
     console.error(error);
-    return res.status(HttpStatusCode.InternalServerError).json({ message: "Error al verificar sesión" });
+    return res.status(HttpStatusCode.InternalServerError).json({
+      message: "Error al verificar sesión"
+    });
   }
 }

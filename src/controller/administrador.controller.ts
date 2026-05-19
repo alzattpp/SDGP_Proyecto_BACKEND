@@ -104,25 +104,36 @@ export async function getCurrentAdministrador(req: Request, res: Response): Prom
     const token = req.cookies.token;
 
     if (!token) {
-      return res.status(HttpStatusCode.Unauthorized).json({ message: "No autenticado" });
+      return res.status(HttpStatusCode.Unauthorized).json({
+        message: "No autenticado"
+      });
     }
 
     const decoded: any = jwt.verify(token, secretKey);
 
     // 🔥 VALIDAMOS ROL
     if (decoded.rol !== "admin") {
-      return res.status(HttpStatusCode.Forbidden).json({ message: "No autorizado" });
+      return res.status(HttpStatusCode.Forbidden).json({
+        message: "No autorizado"
+      });
     }
 
-    // 🔥 buscamos el admin por idUsuario
+    // 🔥 Buscamos el admin por idUsuario
     const admins = await getAdministradores_get();
 
+    console.log("ID USUARIO TOKEN:", decoded.userId);
+    console.log("ROL TOKEN:", decoded.rol);
+    console.log("ADMINISTRADORES:", admins);
+
     const admin = admins.find(
-      (a) => a.idUsuario === Number(decoded.userId)
+      (a) => Number(a.idUsuario) === Number(decoded.userId)
     );
 
     if (!admin) {
-      return res.status(HttpStatusCode.NotFound).json({ message: "Administrador no encontrado" });
+      return res.status(HttpStatusCode.NotFound).json({
+        message: "Administrador no encontrado",
+        idUsuarioToken: decoded.userId
+      });
     }
 
     return res.status(HttpStatusCode.Ok).json({
@@ -132,6 +143,8 @@ export async function getCurrentAdministrador(req: Request, res: Response): Prom
 
   } catch (error) {
     console.error(error);
-    return res.status(HttpStatusCode.InternalServerError).json({ message: "Error al verificar sesión" });
+    return res.status(HttpStatusCode.InternalServerError).json({
+      message: "Error al verificar sesión"
+    });
   }
 }
