@@ -1,9 +1,10 @@
 import express, { Application } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+
 import usuarioRoutes from "./routes/usuario.routes";
 import administradorRoutes from "./routes/administrador.routes";
-import trabajadorRoutes from "./routes/trabajador.routes";  
+import trabajadorRoutes from "./routes/trabajador.routes";
 import vehiculoRoutes from "./routes/vehiculo.routes";
 import parqueaderoRoutes from "./routes/parqueadero.routes";
 import ingresoRoutes from "./routes/ingreso.routes";
@@ -23,16 +24,16 @@ class Server {
 
   listen() {
     this.app.listen(this.port, () => {
-      console.log("Aplicacion corriendo por el puerto", this.port);
+      console.log("Aplicación corriendo por el puerto", this.port);
     });
   }
 
-middlewares() {
-  this.app.use(express.json());
-
-  this.app.use(
-    cors({
-      origin: true,
+  middlewares() {
+    const corsOptions = {
+      origin: [
+        "http://localhost:4200",
+        "https://upgrade-store.shop.shop",
+      ],
       credentials: true,
       methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
       allowedHeaders: [
@@ -43,12 +44,16 @@ middlewares() {
         "Origin",
       ],
       optionsSuccessStatus: 204,
-    })
-  );
+    };
 
-  this.app.use(cookieParser());
-}
+    this.app.use(cors(corsOptions));
 
+    // Importante para responder correctamente las peticiones preflight
+    this.app.options(/.*/, cors(corsOptions));
+
+    this.app.use(express.json());
+    this.app.use(cookieParser());
+  }
 
   routes() {
     this.app.use("/api/usuarios", usuarioRoutes);
