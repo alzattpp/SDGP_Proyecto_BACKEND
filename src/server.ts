@@ -7,6 +7,8 @@ import trabajadorRoutes from "./routes/trabajador.routes";
 import vehiculoRoutes from "./routes/vehiculo.routes";
 import parqueaderoRoutes from "./routes/parqueadero.routes";
 import ingresoRoutes from "./routes/ingreso.routes";
+import mediopagoRoutes from "./routes/mediopago.routes";
+import pagoRoutes from "./routes/pago.routes";
 
 class Server {
   private app: Application;
@@ -44,6 +46,8 @@ middlewares() {
     this.app.use("/api/vehiculos", vehiculoRoutes);
     this.app.use("/api/parqueaderos", parqueaderoRoutes);
     this.app.use("/api/ingresos", ingresoRoutes);
+    this.app.use("/api/mediopagos", mediopagoRoutes);
+    this.app.use("/api/pagos", pagoRoutes);
   }
 }
 

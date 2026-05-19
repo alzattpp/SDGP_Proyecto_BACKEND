@@ -110,3 +110,73 @@ export async function deleteUsuario_delete(idUsuario: number): Promise<boolean> 
     return false;
   }
 }
+
+// 🔹 AUMENTAR LOGIN
+export async function incrementarLogins_put(
+  idUsuario: number
+): Promise<boolean> {
+
+  try {
+
+    await db.connect();
+
+    const sql = `
+      UPDATE Usuario
+      SET cantidadLogins = cantidadLogins + 1
+      WHERE idUsuario = ?
+    `;
+
+    const response: any = await db.query(
+      sql,
+      [idUsuario]
+    );
+
+    db.close();
+
+    return response.affectedRows > 0;
+
+  } catch(error){
+
+    console.error(error);
+
+    return false;
+  }
+}
+
+
+// 🔹 OBTENER CANTIDAD DE LOGINS
+export async function getCantidadLogins_get(
+  idUsuario:number
+): Promise<number>{
+
+  try{
+
+    await db.connect();
+
+    const sql = `
+      SELECT cantidadLogins
+      FROM Usuario
+      WHERE idUsuario = ?
+    `;
+
+    const response:any = await db.query(
+      sql,
+      [idUsuario]
+    );
+
+    db.close();
+
+    if(response.length === 0){
+      return 0;
+    }
+
+    return response[0].cantidadLogins;
+
+  }catch(error){
+
+    console.error(error);
+
+    return 0;
+  }
+
+}

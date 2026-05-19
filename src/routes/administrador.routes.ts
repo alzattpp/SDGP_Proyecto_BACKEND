@@ -11,7 +11,8 @@ import {
   getAdministradorById,
   createAdministrador,
   updateAdministrador,
-  deleteAdministrador
+  deleteAdministrador,
+  getCurrentAdministrador
 } from "../controller/administrador.controller";
 
 const router = Router();
@@ -32,5 +33,5 @@ router.put(
 );
 
 router.delete("/delete/:idUsuario", deleteAdministrador);
-
+router.get("/me", getCurrentAdministrador);
 export default router;

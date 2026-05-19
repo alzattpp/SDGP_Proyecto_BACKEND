@@ -5,6 +5,8 @@ export interface UsuarioInterface {
   contrasena: string;
   documento: string;
   rol: string;
+  cantidadLogins?: number;
+
 }
 
 export interface TrabajadorInterface {

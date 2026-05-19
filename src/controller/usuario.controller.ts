@@ -6,6 +6,8 @@ import {
   createUsuario_post,
   updateUsuario_put,
   deleteUsuario_delete,
+  incrementarLogins_put,
+  getCantidadLogins_get
 } from "../models/usuario.model";
 
 import bcrypt from "bcryptjs";
@@ -30,6 +32,9 @@ export async function loginUsuario(req: Request, res: Response): Promise<Respons
     if (!validPassword) {
       return res.status(HttpStatusCode.Unauthorized).json({ message: "Contraseña incorrecta" });
     }
+    await incrementarLogins_put(
+  Number(usuario.idUsuario)
+);
 
     // 🔥 TOKEN CON ROL
     const token = jwt.sign(
@@ -209,4 +214,50 @@ export function logoutUsuario(req: Request, res: Response): Response {
     console.error(error);
     return res.status(HttpStatusCode.InternalServerError).json({ message: "Error al cerrar sesión" });
   }
+}
+// 🔹 OBTENER CANTIDAD DE LOGINS DEL USUARIO ACTUAL
+export async function getCantidadLogins(
+  req: Request,
+  res: Response
+): Promise<Response> {
+
+  try {
+
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(
+        HttpStatusCode.Unauthorized
+      ).json({
+        message: "No autenticado"
+      });
+    }
+
+    const decoded: any = jwt.verify(
+      token,
+      secretKey
+    );
+
+    const total = await getCantidadLogins_get(
+      Number(decoded.userId)
+    );
+
+    return res.status(
+      HttpStatusCode.Ok
+    ).json({
+      totalLogins: total
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    return res.status(
+      HttpStatusCode.InternalServerError
+    ).json({
+      message: "Error servidor"
+    });
+
+  }
+
 }

@@ -9,6 +9,9 @@ import {
 } from "../models/administrador.model";
 
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
+const secretKey = "clave-secreta";
 
 // 🔹 GET ALL
 export async function getAdministradores(req: Request, res: Response): Promise<Response> {
@@ -93,4 +96,42 @@ export async function deleteAdministrador(req: Request, res: Response): Promise<
   }
 
   return res.status(HttpStatusCode.Ok).json({ message: "Eliminado correctamente" });
+}
+
+// 🔹 GET /me ADMIN
+export async function getCurrentAdministrador(req: Request, res: Response): Promise<Response> {
+  try {
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(HttpStatusCode.Unauthorized).json({ message: "No autenticado" });
+    }
+
+    const decoded: any = jwt.verify(token, secretKey);
+
+    // 🔥 VALIDAMOS ROL
+    if (decoded.rol !== "admin") {
+      return res.status(HttpStatusCode.Forbidden).json({ message: "No autorizado" });
+    }
+
+    // 🔥 buscamos el admin por idUsuario
+    const admins = await getAdministradores_get();
+
+    const admin = admins.find(
+      (a) => a.idUsuario === Number(decoded.userId)
+    );
+
+    if (!admin) {
+      return res.status(HttpStatusCode.NotFound).json({ message: "Administrador no encontrado" });
+    }
+
+    return res.status(HttpStatusCode.Ok).json({
+      data: admin,
+      rol: decoded.rol
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(HttpStatusCode.InternalServerError).json({ message: "Error al verificar sesión" });
+  }
 }

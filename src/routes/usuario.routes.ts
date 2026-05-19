@@ -15,7 +15,8 @@ import {
   deleteUsuario,
   loginUsuario,
   logoutUsuario,
-  getCurrentUsuario
+  getCurrentUsuario,
+  getCantidadLogins
 } from "../controller/usuario.controller";
 
 const router = Router();
@@ -28,5 +29,9 @@ router.delete("/delete/:id", deleteUsuario);
 router.post("/login", validateSchema(loginUsuarioSchema), loginUsuario);
 router.post("/logout", logoutUsuario);
 router.get("/me", getCurrentUsuario);
+router.get(
+  "/cantidadLogins",
+  getCantidadLogins
+);
 
 export default router;

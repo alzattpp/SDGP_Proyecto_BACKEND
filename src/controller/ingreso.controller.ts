@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { HttpStatusCode } from "axios";
+
 import {
   getIngresos_get,
   getIngresoById_get,
@@ -8,101 +9,227 @@ import {
   deleteIngreso_delete
 } from "../models/ingreso.model";
 
-// 🔹 GET ALL
-export async function getIngresos(req: Request, res: Response): Promise<Response> {
-  const data = await getIngresos_get();
-  return res.status(HttpStatusCode.Ok).json({ data });
+
+// 🔥 Hora Colombia para MySQL
+function obtenerHoraColombia(): string {
+
+  return new Date()
+    .toLocaleString(
+      "sv-SE",
+      {
+        timeZone: "America/Bogota",
+        hour12: false
+      }
+    );
+
 }
+
+
+// 🔹 GET ALL
+export async function getIngresos(
+  req: Request,
+  res: Response
+): Promise<Response> {
+
+  const data = await getIngresos_get();
+
+  return res.status(
+    HttpStatusCode.Ok
+  ).json({
+    data
+  });
+
+}
+
 
 // 🔹 GET BY ID
-export async function getIngresoById(req: Request<{ id: string }>, res: Response): Promise<Response> {
+export async function getIngresoById(
+  req: Request<{ id: string }>,
+  res: Response
+): Promise<Response> {
+
   const { id } = req.params;
 
-  const data = await getIngresoById_get(Number(id));
+  const data =
+  await getIngresoById_get(
+    Number(id)
+  );
 
   if (!data) {
-    return res.status(HttpStatusCode.NotFound).json({ message: "No encontrado" });
+
+    return res.status(
+      HttpStatusCode.NotFound
+    ).json({
+      message: "No encontrado"
+    });
+
   }
 
-  return res.status(HttpStatusCode.Ok).json({ data });
+  return res.status(
+    HttpStatusCode.Ok
+  ).json({
+    data
+  });
+
 }
 
-export async function createIngreso(req: Request, res: Response): Promise<Response> {
+
+// 🔹 CREATE
+export async function createIngreso(
+  req: Request,
+  res: Response
+): Promise<Response> {
+
   try {
-    const { placa, idParqueadero } = req.body;
 
-    // 🔥 Formato correcto para MySQL
-    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+    const {
+      placa,
+      idParqueadero
+    } = req.body;
 
-    const success = await createIngreso_post({
+    const now =
+    obtenerHoraColombia();
+
+    console.log(
+      "Hora Colombia:",
+      now
+    );
+
+    const success =
+    await createIngreso_post({
+
       placa,
       idParqueadero,
       horaIngreso: now,
-      estado: "EN_PARQUEADERO", // 🔥 SIEMPRE este estado
+      estado: "EN_PARQUEADERO"
+
     });
 
     if (!success) {
-      return res.status(HttpStatusCode.BadRequest).json({
+
+      return res.status(
+        HttpStatusCode.BadRequest
+      ).json({
         message: "No se pudo registrar ingreso"
       });
+
     }
 
-    return res.status(HttpStatusCode.Ok).json({
+    return res.status(
+      HttpStatusCode.Ok
+    ).json({
       message: "Ingreso registrado correctamente"
     });
 
   } catch (error) {
-    console.error("Error en createIngreso:", error);
-    return res.status(HttpStatusCode.InternalServerError).json({
+
+    console.error(
+      "Error en createIngreso:",
+      error
+    );
+
+    return res.status(
+      HttpStatusCode.InternalServerError
+    ).json({
       message: "Error servidor"
     });
+
   }
+
 }
 
-// 🔹 UPDATE (salida)
-export async function updateIngreso(req: Request<{ id: string }>, res: Response): Promise<Response> {
+
+// 🔹 UPDATE (SALIDA)
+export async function updateIngreso(
+  req: Request<{ id: string }>,
+  res: Response
+): Promise<Response> {
+
   try {
+
     const { id } = req.params;
 
-    // 🔥 Formato correcto para MySQL
-    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+    const now =
+    obtenerHoraColombia();
 
-    const success = await updateIngreso_put({
+    console.log(
+      "Hora Colombia:",
+      now
+    );
+
+    const success =
+    await updateIngreso_put({
+
       idIngreso: Number(id),
       horaSalida: now,
-      estado: "FINALIZADO", // 🔥 cambia estado al salir
+      estado: "FINALIZADO",
       placa: "",
       idParqueadero: 0,
-      horaIngreso: "",
+      horaIngreso: ""
+
     });
 
     if (!success) {
-      return res.status(HttpStatusCode.BadRequest).json({
+
+      return res.status(
+        HttpStatusCode.BadRequest
+      ).json({
         message: "No se pudo registrar salida"
       });
+
     }
 
-    return res.status(HttpStatusCode.Ok).json({
+    return res.status(
+      HttpStatusCode.Ok
+    ).json({
       message: "Salida registrada correctamente"
     });
 
   } catch (error) {
-    console.error("Error en updateIngreso:", error);
-    return res.status(HttpStatusCode.InternalServerError).json({
+
+    console.error(
+      "Error en updateIngreso:",
+      error
+    );
+
+    return res.status(
+      HttpStatusCode.InternalServerError
+    ).json({
       message: "Error servidor"
     });
+
   }
+
 }
 
+
 // 🔹 DELETE
-export async function deleteIngreso(req: Request<{ id: string }>, res: Response): Promise<Response> {
+export async function deleteIngreso(
+  req: Request<{ id: string }>,
+  res: Response
+): Promise<Response> {
+
   const { id } = req.params;
 
-  const success = await deleteIngreso_delete(Number(id));
+  const success =
+  await deleteIngreso_delete(
+    Number(id)
+  );
 
   if (!success) {
-    return res.status(HttpStatusCode.BadRequest).json({ message: "No se pudo eliminar" });
+
+    return res.status(
+      HttpStatusCode.BadRequest
+    ).json({
+      message: "No se pudo eliminar"
+    });
+
   }
 
-  return res.status(HttpStatusCode.Ok).json({ message: "Eliminado correctamente" });
+  return res.status(
+    HttpStatusCode.Ok
+  ).json({
+    message: "Eliminado correctamente"
+  });
+
 }
