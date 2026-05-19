@@ -32,7 +32,7 @@ class Server {
     const corsOptions = {
       origin: [
         "http://localhost:4200",
-        "https://upgrade-store.shop.shop",
+        "https://upgrade-store.shop",
       ],
       credentials: true,
       methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
