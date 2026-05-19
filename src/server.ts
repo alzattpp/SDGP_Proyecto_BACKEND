@@ -30,10 +30,21 @@ class Server {
 middlewares() {
   this.app.use(express.json());
 
-  this.app.use(cors({
-    origin: '*', 
-    credentials: true,               
-  }));
+  this.app.use(
+    cors({
+      origin: true,
+      credentials: true,
+      methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+      allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "Accept",
+        "Origin",
+      ],
+      optionsSuccessStatus: 204,
+    })
+  );
 
   this.app.use(cookieParser());
 }
