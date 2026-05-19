@@ -111,28 +111,28 @@ export async function getCurrentAdministrador(req: Request, res: Response): Prom
 
     const decoded: any = jwt.verify(token, secretKey);
 
-    // 🔥 VALIDAMOS ROL
+    // Validamos rol
     if (decoded.rol !== "admin") {
       return res.status(HttpStatusCode.Forbidden).json({
         message: "No autorizado"
       });
     }
 
-    // 🔥 Buscamos el admin por idUsuario
     const admins = await getAdministradores_get();
 
-    console.log("ID USUARIO TOKEN:", decoded.userId);
-    console.log("ROL TOKEN:", decoded.rol);
-    console.log("ADMINISTRADORES:", admins);
+    const admin = admins.find((a) => {
+      const idUsuarioAdmin =
+        a.idUsuario ??
+        a.idusuario ??
+        a.id_usuario ??
+        a.IDUSUARIO;
 
-    const admin = admins.find(
-      (a) => Number(a.idUsuario) === Number(decoded.userId)
-    );
+      return Number(idUsuarioAdmin) === Number(decoded.userId);
+    });
 
     if (!admin) {
       return res.status(HttpStatusCode.NotFound).json({
-        message: "Administrador no encontrado",
-        idUsuarioToken: decoded.userId
+        message: "Administrador no encontrado"
       });
     }
 

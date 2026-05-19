@@ -138,12 +138,15 @@ export async function getCurrentTrabajador(req: Request, res: Response): Promise
 
     const trabajadores = await getTrabajadores_get();
 
-    console.log("ID USUARIO TOKEN:", decoded.userId);
-    console.log("TRABAJADORES:", trabajadores);
+    const trabajador = trabajadores.find((t) => {
+  const idUsuarioTrabajador =
+    t.idUsuario ??
+    t.idusuario ??
+    t.id_usuario ??
+    t.IDUSUARIO;
 
-    const trabajador = trabajadores.find(
-      (t) => Number(t.idUsuario) === Number(decoded.userId)
-    );
+  return Number(idUsuarioTrabajador) === Number(decoded.userId);
+});
 
     if (!trabajador) {
       return res.status(HttpStatusCode.NotFound).json({

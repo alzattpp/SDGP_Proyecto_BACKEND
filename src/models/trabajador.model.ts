@@ -142,6 +142,7 @@ const sqlUsuario = `
   }
 }
 
+
 // 🔹 DELETE (borra usuario y cascada elimina trabajador)
 export async function deleteTrabajador_delete(idUsuario: number): Promise<boolean> {
   try {
