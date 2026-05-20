@@ -33,6 +33,7 @@ class Server {
       origin: [
         "http://localhost:4200",
         "https://upgrade-store.shop",
+        "https://sdgp-proyecto-front.vercel.app"
       ],
       credentials: true,
       methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
