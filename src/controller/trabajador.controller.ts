@@ -68,20 +68,19 @@ export async function createTrabajador(req: Request, res: Response): Promise<Res
   }
 }
 
-// 🔹 UPDATE
+// 🔹 UPDATE — :id es idTrabajador (no idUsuario)
 export async function updateTrabajador(req: Request, res: Response): Promise<Response> {
   try {
     const { id } = req.params;
-    const { idUsuario, nombreCompleto, correo, contrasena, documento, telefono, idParqueadero } = req.body;
+    const { nombreCompleto, correo, contrasena, documento, telefono, idParqueadero } = req.body;
 
-    const encryptedPass = contrasena ? bcrypt.hashSync(contrasena, 10) : contrasena;
+    const encryptedPass = contrasena ? bcrypt.hashSync(contrasena, 10) : undefined;
 
     const success = await updateTrabajador_put({
       idTrabajador: Number(id),
-      idUsuario,
       nombreCompleto,
       correo,
-      contrasena: encryptedPass,
+      contrasena: encryptedPass ?? "",
       documento,
       telefono,
       idParqueadero,

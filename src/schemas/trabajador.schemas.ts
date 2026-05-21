@@ -32,10 +32,7 @@ export const createTrabajadorSchema = z.object({
 });
 
 export const updateTrabajadorSchema = z.object({
-  idUsuario: z
-    .number()
-    .int("Debe ser entero")
-    .positive("ID inválido"),
+  idUsuario: z.number().int().positive().optional(),
 
   nombreCompleto: z.string().min(3).optional(),
 

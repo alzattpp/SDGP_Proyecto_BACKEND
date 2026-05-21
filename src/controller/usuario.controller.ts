@@ -154,19 +154,15 @@ export async function updateUsuario(req: Request, res: Response): Promise<Respon
     const { id } = req.params;
     const { nombreCompleto, correo, contrasena, documento, rol } = req.body;
 
-    let encryptedPass;
-
-    if (contrasena) {
-      encryptedPass = bcrypt.hashSync(contrasena, 10);
-    }
+    const encryptedPass = contrasena ? bcrypt.hashSync(contrasena, 10) : undefined;
 
     const success = await updateUsuario_put({
       idUsuario: Number(id),
       nombreCompleto,
       correo,
-      contrasena: encryptedPass || contrasena,
+      contrasena: encryptedPass ?? "",
       documento,
-      rol // 🔥 incluir rol
+      rol,
     });
 
     if (!success) {

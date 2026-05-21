@@ -1,58 +1,50 @@
 import MySQLConnector from "../db/connection";
 import { AdministradorInterface } from "../interfaces/intrefaces";
 
-const db = new MySQLConnector();
-
 // 🔹 GET ALL
 export async function getAdministradores_get(): Promise<any[]> {
+  const db = new MySQLConnector();
   try {
-    await db.connect();
-
     const sql = `
       SELECT a.idAdmin, u.idUsuario, u.nombreCompleto, u.correo, u.documento
       FROM Administrador a
       INNER JOIN Usuario u ON a.idUsuario = u.idUsuario
     `;
-
     const response: any = await db.query(sql);
-    db.close();
     return response;
-
   } catch (error) {
     console.error(error);
     return [];
+  } finally {
+    await db.close();
   }
 }
 
 // 🔹 GET BY ID
 export async function getAdministradorById_get(idAdmin: number): Promise<any | null> {
+  const db = new MySQLConnector();
   try {
-    await db.connect();
-
     const sql = `
       SELECT a.idAdmin, u.idUsuario, u.nombreCompleto, u.correo, u.documento
       FROM Administrador a
       INNER JOIN Usuario u ON a.idUsuario = u.idUsuario
       WHERE a.idAdmin = ?
     `;
-
     const response: any = await db.query(sql, [idAdmin]);
-    db.close();
-
     return response.length > 0 ? response[0] : null;
-
   } catch (error) {
     console.error(error);
     return null;
+  } finally {
+    await db.close();
   }
 }
 
 export async function createAdministrador_post(data: AdministradorInterface): Promise<boolean> {
+  const db = new MySQLConnector();
   try {
-    await db.connect();
     await db.beginTransaction();
 
-    // 🔥 AQUÍ EL CAMBIO
     const sqlUsuario = `
       INSERT INTO Usuario (nombreCompleto, correo, contrasena, documento, rol)
       VALUES (?, ?, ?, ?, ?)
@@ -63,7 +55,7 @@ export async function createAdministrador_post(data: AdministradorInterface): Pr
       data.correo,
       data.contrasena,
       data.documento,
-      "admin" // 🔥 CLAVE
+      "admin",
     ]);
 
     const idUsuario = resultUsuario.insertId;
@@ -76,65 +68,78 @@ export async function createAdministrador_post(data: AdministradorInterface): Pr
     const resultAdmin: any = await db.query(sqlAdmin, [idUsuario]);
 
     await db.commit();
-    db.close();
-
     return resultAdmin.affectedRows > 0;
-
   } catch (error) {
     await db.rollback();
-    db.close();
     console.error(error);
     return false;
+  } finally {
+    await db.close();
   }
 }
 
-// 🔹 UPDATE (TRANSACCIÓN 🔥)
+// 🔹 UPDATE (TRANSACCIÓN)
 export async function updateAdministrador_put(data: AdministradorInterface): Promise<boolean> {
+  const db = new MySQLConnector();
   try {
-    await db.connect();
     await db.beginTransaction();
 
-    // 🔥 FORZAMOS rol = admin
-    const sqlUsuario = `
-      UPDATE Usuario
-      SET nombreCompleto = ?, correo = ?, contrasena = ?, documento = ?, rol = 'admin'
-      WHERE idUsuario = ?
-    `;
+    const existing: any = await db.query(
+      "SELECT idUsuario FROM Administrador WHERE idAdmin = ?",
+      [data.idAdmin]
+    );
 
-    const result: any = await db.query(sqlUsuario, [
-      data.nombreCompleto,
-      data.correo,
-      data.contrasena,
-      data.documento,
-      data.idUsuario,
-    ]);
+    if (!existing?.length) {
+      await db.rollback();
+      return false;
+    }
+
+    const idUsuario = existing[0].idUsuario;
+
+    if (data.contrasena) {
+      await db.query(
+        `UPDATE Usuario
+         SET nombreCompleto = ?, correo = ?, contrasena = ?, documento = ?, rol = 'admin'
+         WHERE idUsuario = ?`,
+        [
+          data.nombreCompleto,
+          data.correo,
+          data.contrasena,
+          data.documento,
+          idUsuario,
+        ]
+      );
+    } else {
+      await db.query(
+        `UPDATE Usuario
+         SET nombreCompleto = ?, correo = ?, documento = ?, rol = 'admin'
+         WHERE idUsuario = ?`,
+        [data.nombreCompleto, data.correo, data.documento, idUsuario]
+      );
+    }
 
     await db.commit();
-    db.close();
-
-    return result.affectedRows > 0;
-
+    return true;
   } catch (error) {
     await db.rollback();
-    db.close();
     console.error(error);
     return false;
+  } finally {
+    await db.close();
   }
 }
 
 // 🔹 DELETE (por cascada)
 export async function deleteAdministrador_delete(idUsuario: number): Promise<boolean> {
+  const db = new MySQLConnector();
   try {
-    await db.connect();
-
     const sql = `DELETE FROM Usuario WHERE idUsuario = ?`;
     const response: any = await db.query(sql, [idUsuario]);
-
-    db.close();
     return response.affectedRows > 0;
-
   } catch (error) {
     console.error(error);
     return false;
+  } finally {
+    await db.close();
   }
 }

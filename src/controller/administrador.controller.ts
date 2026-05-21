@@ -61,16 +61,15 @@ export async function createAdministrador(req: Request, res: Response): Promise<
 export async function updateAdministrador(req: Request, res: Response): Promise<Response> {
   try {
     const { id } = req.params;
-    const { idUsuario, nombreCompleto, correo, contrasena, documento } = req.body;
+    const { nombreCompleto, correo, contrasena, documento } = req.body;
 
-    const encryptedPass = contrasena ? bcrypt.hashSync(contrasena, 10) : contrasena;
+    const encryptedPass = contrasena ? bcrypt.hashSync(contrasena, 10) : undefined;
 
     const success = await updateAdministrador_put({
       idAdmin: Number(id),
-      idUsuario,
       nombreCompleto,
       correo,
-      contrasena: encryptedPass,
+      contrasena: encryptedPass ?? "",
       documento,
     });
 
