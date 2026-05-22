@@ -2,9 +2,11 @@ import { Request, Response } from "express";
 import { HttpStatusCode } from "axios";
 
 import {
+
     getOcupacionReporte_get,
     getIngresosReporte_get,
     getPagosReporte_get
+
 }
 from "../models/reporte.model";
 
@@ -18,13 +20,16 @@ export async function getOcupacionReporte(
 
     try{
 
-        const { idParqueadero } = req.params;
+        const { idParqueadero }=
+        req.params;
 
-        const data =
+        const data=
         await getOcupacionReporte_get(
+
             idParqueadero
             ? Number(idParqueadero)
             : undefined
+
         );
 
         return res.status(
@@ -33,14 +38,16 @@ export async function getOcupacionReporte(
             data
         });
 
-    }catch(error){
+    }
+    catch(error){
 
         console.error(error);
 
         return res.status(
             HttpStatusCode.InternalServerError
         ).json({
-            message:"Error generando reporte"
+            message:
+            "Error generando reporte"
         });
 
     }
@@ -57,13 +64,16 @@ export async function getIngresosReporte(
 
     try{
 
-        const { idParqueadero }=req.params;
+        const { idParqueadero }=
+        req.params;
 
         const data=
         await getIngresosReporte_get(
+
             idParqueadero
             ? Number(idParqueadero)
             : undefined
+
         );
 
         return res.status(
@@ -72,14 +82,16 @@ export async function getIngresosReporte(
             data
         });
 
-    }catch(error){
+    }
+    catch(error){
 
         console.error(error);
 
         return res.status(
             HttpStatusCode.InternalServerError
         ).json({
-            message:"Error generando reporte"
+            message:
+            "Error generando reporte"
         });
 
     }
@@ -90,9 +102,9 @@ export async function getIngresosReporte(
 
 // 🔹 REPORTE PAGOS
 export async function getPagosReporte(
-    req:Request,
-    res:Response
-):Promise<Response>{
+    req: Request,
+    res: Response
+): Promise<Response>{
 
     try{
 
@@ -105,14 +117,16 @@ export async function getPagosReporte(
             data
         });
 
-    }catch(error){
+    }
+    catch(error){
 
         console.error(error);
 
         return res.status(
             HttpStatusCode.InternalServerError
         ).json({
-            message:"Error generando reporte"
+            message:
+            "Error generando reporte"
         });
 
     }

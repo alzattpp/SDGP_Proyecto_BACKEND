@@ -78,3 +78,26 @@ export interface ReservaInterface {
   fecha: string;
   estado?: string;
 }
+export interface ReporteOcupacionInterface {
+    idParqueadero: number;
+    nombre: string;
+    ocupados: number;
+    disponibles: number;
+}
+
+export interface ReporteIngresosInterface {
+    idIngreso: number;
+    placa: string;
+    horaIngreso: string;
+    horaSalida?: string;
+    estado: string;
+    nombre: string;
+}
+
+export interface ReportePagosInterface {
+    totalPagos: number;
+    totalRecaudado: number;
+    promedioPago: number;
+    pagoMayor: number;
+    pagoMenor: number;
+}

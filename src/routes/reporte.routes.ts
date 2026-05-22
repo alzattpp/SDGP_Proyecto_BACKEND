@@ -1,32 +1,29 @@
 import { Router } from "express";
 
 import {
-  getOcupacionReporte,
-  getIngresosReporte,
-  getPagosReporte
-} from "../controller/reporte.controller";
 
-const router = Router();
+getOcupacionReporte,
+getIngresosReporte,
+getPagosReporte
 
+}
+from "../controller/reporte.controller";
 
-// 🔹 ocupacion actual
+const router=Router();
+
 router.get(
-  "/ocupacion/:idParqueadero?",
-  getOcupacionReporte
+"/ocupacion/:idParqueadero?",
+getOcupacionReporte
 );
 
-
-// 🔹 ingresos vehiculares
 router.get(
-  "/ingresos/:idParqueadero?",
-  getIngresosReporte
+"/ingresos/:idParqueadero?",
+getIngresosReporte
 );
 
-
-// 🔹 pagos realizados
 router.get(
-  "/pagos",
-  getPagosReporte
+"/pagos",
+getPagosReporte
 );
 
 export default router;

@@ -1,191 +1,221 @@
 import MySQLConnector from "../db/connection";
 
+import {
+    ReporteOcupacionInterface,
+    ReporteIngresosInterface,
+    ReportePagosInterface
+}
+from "../interfaces/intrefaces";
 
-// 🔹 REPORTE 1: ocupacion actual
+
+
+// 🔹 REPORTE OCUPACION
 export async function getOcupacionReporte_get(
-  idParqueadero?: number
-): Promise<any[]> {
+    idParqueadero?: number
+): Promise<ReporteOcupacionInterface[]> {
 
-  const db = new MySQLConnector();
+    const db = new MySQLConnector();
 
-  try {
+    try {
 
-    let sql = `
-      SELECT
+        let sql = `
+
+        SELECT
+
+            p.idParqueadero,
+            p.nombre,
+
+            COUNT(
+                CASE
+                    WHEN i.estado='activo'
+                    THEN i.idIngreso
+                END
+            ) AS ocupados,
+
+            (
+                p.capacidadMaxima -
+
+                COUNT(
+                    CASE
+                        WHEN i.estado='activo'
+                        THEN i.idIngreso
+                    END
+                )
+
+            ) AS disponibles
+
+        FROM Parqueadero p
+
+        LEFT JOIN Ingreso i
+        ON p.idParqueadero=i.idParqueadero
+
+        `;
+
+        const params:any[]=[];
+
+        if(idParqueadero){
+
+            sql+=`
+            WHERE p.idParqueadero=?
+            `;
+
+            params.push(
+                idParqueadero
+            );
+
+        }
+
+        sql+=`
+
+        GROUP BY
         p.idParqueadero,
-        p.nombreParqueadero,
+        p.nombre
 
-        COUNT(
-          CASE
-            WHEN i.fechaSalida IS NULL
-            THEN i.idIngreso
-          END
-        ) AS ocupados,
+        `;
 
-        (
-          p.totalCupos -
-          COUNT(
-            CASE
-              WHEN i.fechaSalida IS NULL
-              THEN i.idIngreso
-            END
-          )
-        ) AS disponibles
+        const response:any=
+        await db.query(
+            sql,
+            params
+        );
 
-      FROM Parqueadero p
+        return response;
 
-      LEFT JOIN Ingreso i
-      ON p.idParqueadero=i.idParqueadero
-    `;
-
-    const params:any[]=[];
-
-    if(idParqueadero){
-
-      sql+=`
-      WHERE p.idParqueadero=?
-      `;
-
-      params.push(idParqueadero);
     }
+    catch(error){
 
-    sql+=`
-      GROUP BY
-      p.idParqueadero,
-      p.nombreParqueadero
-    `;
+        console.error(error);
 
-    const response:any=
-    await db.query(
-      sql,
-      params
-    );
+        return [];
 
-    return response;
+    }
+    finally{
 
-  } catch(error){
+        await db.close();
 
-    console.error(error);
-    return [];
-
-  } finally{
-
-    await db.close();
-
-  }
+    }
 
 }
 
 
 
-// 🔹 REPORTE 2: ingresos vehiculares
+// 🔹 REPORTE INGRESOS
 export async function getIngresosReporte_get(
-  idParqueadero?:number
-):Promise<any[]>{
+    idParqueadero?:number
+):Promise<ReporteIngresosInterface[]>{
 
-  const db=new MySQLConnector();
+    const db=new MySQLConnector();
 
-  try{
+    try{
 
-    let sql=`
-      SELECT
+        let sql=`
 
-      i.idIngreso,
-      v.placa,
-      i.fechaEntrada,
-      i.fechaSalida,
-      p.nombreParqueadero
+        SELECT
 
-      FROM Ingreso i
+            i.idIngreso,
+            i.placa,
+            i.horaIngreso,
+            i.horaSalida,
+            i.estado,
+            p.nombre
 
-      INNER JOIN Vehiculo v
-      ON i.idVehiculo=v.idVehiculo
+        FROM Ingreso i
 
-      INNER JOIN Parqueadero p
-      ON i.idParqueadero=p.idParqueadero
-    `;
+        INNER JOIN Parqueadero p
+        ON i.idParqueadero=p.idParqueadero
 
-    const params:any[]=[];
+        `;
 
-    if(idParqueadero){
+        const params:any[]=[];
 
-      sql+=`
-      WHERE p.idParqueadero=?
-      `;
+        if(idParqueadero){
 
-      params.push(
-        idParqueadero
-      );
+            sql+=`
+            WHERE p.idParqueadero=?
+            `;
+
+            params.push(
+                idParqueadero
+            );
+
+        }
+
+        sql+=`
+
+        ORDER BY
+        i.horaIngreso DESC
+
+        `;
+
+        const response:any=
+        await db.query(
+            sql,
+            params
+        );
+
+        return response;
 
     }
+    catch(error){
 
-    sql+=`
-      ORDER BY
-      i.fechaEntrada DESC
-    `;
+        console.error(error);
 
-    const response:any=
-    await db.query(
-      sql,
-      params
-    );
+        return [];
 
-    return response;
+    }
+    finally{
 
-  }catch(error){
+        await db.close();
 
-    console.error(error);
-    return [];
-
-  }finally{
-
-    await db.close();
-
-  }
+    }
 
 }
 
 
 
-// 🔹 REPORTE 3: pagos realizados
-export async function getPagosReporte_get():Promise<any>{
+// 🔹 REPORTE PAGOS
+export async function getPagosReporte_get(
+):Promise<ReportePagosInterface | null>{
 
-  const db=new MySQLConnector();
+    const db=new MySQLConnector();
 
-  try{
+    try{
 
-    const sql=`
+        const sql=`
 
-    SELECT
+        SELECT
 
-      COUNT(*) totalPagos,
+            COUNT(*) AS totalPagos,
 
-      SUM(valorTotal) totalRecaudado,
+            SUM(monto) AS totalRecaudado,
 
-      AVG(valorTotal) promedioPago,
+            AVG(monto) AS promedioPago,
 
-      MAX(valorTotal) pagoMayor,
+            MAX(monto) AS pagoMayor,
 
-      MIN(valorTotal) pagoMenor
+            MIN(monto) AS pagoMenor
 
-    FROM Pago
-    `;
+        FROM Pago
 
-    const response:any=
-    await db.query(sql);
+        `;
 
-    return response[0];
+        const response:any=
+        await db.query(sql);
 
-  }catch(error){
+        return response[0];
 
-    console.error(error);
+    }
+    catch(error){
 
-    return null;
+        console.error(error);
 
-  }finally{
+        return null;
 
-    await db.close();
+    }
+    finally{
 
-  }
+        await db.close();
+
+    }
 
 }
