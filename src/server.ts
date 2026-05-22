@@ -10,6 +10,7 @@ import parqueaderoRoutes from "./routes/parqueadero.routes";
 import ingresoRoutes from "./routes/ingreso.routes";
 import mediopagoRoutes from "./routes/mediopago.routes";
 import pagoRoutes from "./routes/pago.routes";
+import reporteRoutes from "./routes/reporte.routes";
 
 class Server {
   private app: Application;
@@ -65,6 +66,7 @@ class Server {
     this.app.use("/api/ingresos", ingresoRoutes);
     this.app.use("/api/mediopagos", mediopagoRoutes);
     this.app.use("/api/pagos", pagoRoutes);
+    this.app.use("/api/reportes", reporteRoutes);
   }
 }
 
