@@ -68,34 +68,69 @@ export async function createTrabajador(req: Request, res: Response): Promise<Res
   }
 }
 
-// 🔹 UPDATE — :id es idTrabajador (no idUsuario)
-export async function updateTrabajador(req: Request, res: Response): Promise<Response> {
+export async function updateTrabajador(
+  req: Request,
+  res: Response
+): Promise<Response> {
+
   try {
+
     const { id } = req.params;
-    const { nombreCompleto, correo, contrasena, documento, telefono, idParqueadero } = req.body;
 
-    const encryptedPass = contrasena ? bcrypt.hashSync(contrasena, 10) : undefined;
+    const {
+      nombreCompleto,
+      correo,
+      contrasena,
+      documento,
+      telefono,
+      idParqueadero
+    } = req.body;
 
-    const success = await updateTrabajador_put({
+    const data: any = {
       idTrabajador: Number(id),
       nombreCompleto,
       correo,
-      contrasena: encryptedPass ?? "",
       documento,
       telefono,
-      idParqueadero,
-    });
+      idParqueadero
+    };
 
-    if (!success) {
-      return res.status(HttpStatusCode.BadRequest).json({ message: "No se pudo actualizar" });
+    // solo agregar contraseña si viene
+    if (contrasena && contrasena.trim() !== "") {
+      data.contrasena = bcrypt.hashSync(
+        contrasena,
+        10
+      );
     }
 
-    return res.status(HttpStatusCode.Ok).json({ message: "Trabajador actualizado correctamente" });
+    const success = await updateTrabajador_put(data);
+
+    if (!success) {
+      return res.status(
+        HttpStatusCode.BadRequest
+      ).json({
+        message: "No se pudo actualizar"
+      });
+    }
+
+    return res.status(
+      HttpStatusCode.Ok
+    ).json({
+      message: "Trabajador actualizado correctamente"
+    });
 
   } catch (error) {
+
     console.error(error);
-    return res.status(HttpStatusCode.InternalServerError).json({ message: "Error en el servidor" });
+
+    return res.status(
+      HttpStatusCode.InternalServerError
+    ).json({
+      message: "Error en el servidor"
+    });
+
   }
+
 }
 
 // 🔹 DELETE
