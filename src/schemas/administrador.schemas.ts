@@ -8,7 +8,6 @@ export const createAdministradorSchema = z.object({
 });
 
 export const updateAdministradorSchema = z.object({
-  idUsuario: z.number().int().positive(),
   nombreCompleto: z.string().min(3).optional(),
   correo: z.string().email().optional(),
   contrasena: z.string().min(6).optional(),
